@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="format-detection" content="telephone=no">
+
+    <title>
+        二维码登录
+    </title>
+    <script>
+        if (window.navigator.userAgent.toLowerCase().indexOf('xuexi') == -1) {
+            window.location.href = "https://h5.xuexi.cn/page/download.html";
+        }
+    </script>
+    <script src="//assets.xuexi.cn/static/jquery/1.8.3/jquery.min.js"></script>
+    <script src="//assets.xuexi.cn/static/open-develop/2.3.8/dingtalk-promise-lwp.js"></script>
+    <script src="//assets.xuexi.cn/static/ding/0.7.5/dingtalk.js"></script>
+
+    <style>
+        html, body {
+            text-align: center;
+            height: 100%;
+        }
+
+        .round {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            background: #E6E7ED;
+            /*display: block;*/
+            /*-moz-border-radius: 120px;*/
+            /*-webkit-border-radius: 120px;*/
+            text-align: center;
+            background-position: 50% 50%;
+            background-repeat: no-repeat;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 20%;
+            border-radius: 8px;
+        }
+
+        /*.circular {*/
+        /*width: 300px;*/
+        /*height: 300px;*/
+        /*border-radius: 150px;*/
+        /*-webkit-border-radius: 150px;*/
+        /*-moz-border-radius: 150px;*/
+        /*background-image: url(res/girl.jpg) no-repeat;*/
+
+        /*margin-left: auto;*/
+        /*margin-right: auto;*/
+        /*margin-top: 10%;*/
+        /*}*/
+        .text {
+            margin-top: 24px;
+            margin-left: 20%;
+            margin-right: 20%;
+            font-family: . PingFangSC-Regular;
+            font-size: 14px;
+            color: #929292;
+            line-height: 18px;
+            text-align: center;
+        }
+
+        .bindConfirm {
+            display: block;
+            position: relative;
+            height: 44px;
+            line-height: 44px;
+            background-color: #38adff;
+            cursor: pointer;
+            border-radius: 4px;
+            /*text-shadow:0px 1px 0px #2f6627;*/
+            text-align: center;
+            font-size: 17px;
+            text-decoration: none;
+            font-family: PingFangSC-Regular;
+            color: #ffffff;
+            width: 100%;
+            margin-top: 72px;
+            width: calc(100% - 24px);
+            margin-left: 12px;
+            margin-right: 12px;
+        }
+
+        /*.bindConfirm:hover {*/
+        /*background-color:#5cbf2a;*/
+        /*}*/
+        .bindConfirm:active {
+            position: relative;
+            top: 1px;
+            background-color: #c6c6c6;
+        }
+
+
+        .footer {
+            width: 100%;
+            /*margin: auto;*/
+            /*margin-top: 10%;*/
+            position: fixed;
+            top: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 28px;
+            align-content: center;
+            /*margin-top: -60px;!*等于footer的高度*!*/
+        }
+
+        .grayButton {
+            /*margin-top: 10px;*/
+            margin: auto;
+            margin-bottom: 10%;
+            /*width: 80%;*/
+            /*height: 10%;*/
+            /*background-color:#2F4F4F;*/
+            display: inline-block;
+            /*cursor:pointer;*/
+            color: #00B7FF;
+            font-family: Arial;
+            font-size: 16px;
+            padding: 16px 31px;
+            text-decoration: none;
+            margin-bottom: 10%;
+
+            /*text-shadow:0px 1px 0px #2f6627;*/
+        }
+
+        /**/
+
+        /*.content{*/
+        /*margin: auto;*/
+        /*padding: 20px 15px;*/
+        /*font-size: 12px;*/
+        /*color: #666;*/
+        /*}*/
+        /*.content_p{*/
+        /*width: 100%;*/
+        /*padding-top: 20px;*/
+        /*!*padding-bottom: 10px;*!*/
+        /*text-align: center;*/
+        /*}*/
+        /*.content_list{*/
+        /*width: 190px;*/
+        /*border-left: 2px solid #c6c6c6;*/
+        /*padding:0px 8px;*/
+        /*box-sizing:border-box;*/
+        /*margin: auto;*/
+        /*text-align: left;*/
+        /*list-style-type :none;*/
+        /*}*/
+        /*.content_list li{*/
+        /*line-height: 20px;*/
+        /*}*/
+    </style>
+
+</head>
+<body>
+
+<div>
+    <img class="round"
+         src="data:image/png;base64,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"/>
+</div>
+<div class="text">网页版学习强国登录确认<br/>请确认使用本人账号登录</div>
+<a href="#" class="bindConfirm" onclick="conformClick()">登录网页版学习强国</a>
+<div class="footer">
+    <a href="#" class="grayButton" onclick="cancelClick()">取消登录</a>
+</div>
+
+<script>
+    "use strict";
+
+    var moduleName = 'ddh5.IDLAPI.QrcodeI'
+
+    IDLAPI.module(moduleName)
+            .factory('QrcodeI', function () {
+
+                var serviceName = 'QrcodeI';
+
+                var funcList = [["void", "bind", [["string", "qrcode"]]], ["void", "bindV2", [["string", "qrcode"], ["string", "umidToken"]]], ["void", "scan", [["string", "qrcode"]]]];
+
+                var funcs = {};
+
+                funcList.forEach(function (item) {
+                    var funcName = item[1];
+                    funcs[funcName] = function (obj) {
+                        obj = obj || {};
+                        var args = Array.prototype.slice.apply(arguments, []);
+                        return new Promise(function (resolve, reject) {
+                            if (funcName === 'bindV2') {
+                                __lwp({
+                                    uri: '/r/Adaptor/' + serviceName + '/' + funcName,
+                                    headers: {
+                                        "loginType": "1"
+                                    },
+                                    debugUrl: obj.debugUrl,
+                                    data: obj.data,
+                                    success: function (res) {
+                                        if (typeof obj.success == 'function') {
+                                            obj.success(res);
+                                        }
+                                        resolve(res);
+                                    },
+                                    error: function (err) {
+                                        if (typeof obj.error == 'function') {
+                                            obj.error(err);
+                                        }
+                                        reject(err);
+                                    },
+                                    __serviceName: serviceName,
+                                    __funcName: funcName,
+                                    __args: args
+                                });
+                            } else {
+                                IDLAPI.__send({
+                                    uri: '/r/Adaptor/' + serviceName + '/' + funcName,
+                                    headers: {referer: ''},
+                                    debugUrl: obj.debugUrl,
+                                    data: obj.data,
+                                    success: function (res) {
+                                        if (typeof obj.success == 'function') {
+                                            obj.success(res);
+                                        }
+                                        resolve(res);
+                                    },
+                                    error: function (err) {
+                                        if (typeof obj.error == 'function') {
+                                            obj.error(err);
+                                        }
+                                        reject(err);
+                                    },
+                                    __serviceName: serviceName,
+                                    __funcName: funcName,
+                                    __args: args
+                                });
+                            }
+                        });
+                    }
+                })
+
+                return funcs;
+            });
+
+    function __lwp() {
+        var n, i = Array.prototype.slice.apply(arguments, []),
+        o = i[0].uri,
+        s = i[0].data || [],
+        r = i[0].success,
+        t = i[0].error,
+        d = i[0].dataType || "json",
+        h = i[0].headers || {};
+        var headers = Object.assign({
+            referer: window.location.origin + window.location.pathname
+        }, h);
+        return new Promise(function(c, l) {
+            dd.internal.request.lwp({
+                uri: o,
+                body: s,
+                headers: headers,
+                onSuccess: function(a) {
+                    if ("json" == d) if ("string" != typeof a || "{" != a.substring(0, 1) && "[" != a.substring(0, 1) || (a = JSON.parse(a)), a && 200 == a.statusCode) {
+                        var n = a.responseText,
+                        i = {};
+                        n && (i = "{" == n.substring(0, 1) || "[" == n.substring(0, 1) ? JSON.parse(n) : n),
+                        r && r(i),
+                        c(i)
+                    } else if (a.responseText) {
+                        var n = a.responseText,
+                        i = {};
+                        i = "{" == n.substring(0, 1) || "[" == n.substring(0, 1) ? JSON.parse(n) : n,
+                        t && t({
+                            statusCode: i.code,
+                            statusText: i.reason,
+                            responseText: i.reason
+                        }),
+                        l({
+                            statusCode: i.code,
+                            statusText: i.reason,
+                            responseText: i.reason
+                        });
+                        var m = [];
+                        m.push("errorType:lwp"),
+                        m.push("target_url:" + location.href),
+                        m.push("uri:" + o),
+                        m.push("params:" + s.join(",")),
+                        m.push("reponseText:" + JSON.stringify(i)),
+                        dd.biz.util.warn({
+                            message: m.join(" ")
+                        })
+                    } else a && a.statusText && (a.responseText = a.statusText),
+                    t && t(a),
+                    l(a),
+                    dd.biz.util.warn({
+                        logName: "h5_lwp_error",
+                        obj: {
+                            uri: o,
+                            params: s.join(","),
+                            reponseText: JSON.stringify(a)
+                        }
+                    });
+                    else r && r(a),
+                    c(a)
+                },
+                onFail: function(a) {
+                    a = a || {},
+                    t && t(a),
+                    l(a),
+                    dd.biz.util.warn({
+                        logName: "h5_lwp_error",
+                        obj: {
+                            uri: o,
+                            params: s.join(","),
+                            reponseText: JSON.stringify(a)
+                        }
+                    })
+                }
+            })
+        })
+    }
+
+    function getUrlParam(name, url) {
+        // 如果链接没有参数，或者链接中不存在我们要获取的参数，直接返回空
+        if (url.indexOf("?") == -1 || url.indexOf(name + '=') == -1) {
+            return '';
+        }
+        // 获取链接中参数部分
+        var queryString = url.substring(url.indexOf("?") + 1);
+        if (queryString.indexOf('#') > -1) {
+            queryString = queryString.substring(0, queryString.indexOf('#'));
+        }
+        ;
+        // 分离参数对 ?key=value&key2=value2
+        var parameters = queryString.split("&");
+        var pos, paraName, paraValue;
+        for (var i = 0; i < parameters.length; i++) {
+            // 获取等号位置
+            pos = parameters[i].indexOf('=');
+            if (pos == -1) {
+                continue;
+            }
+            // 获取name 和 value
+            paraName = parameters[i].substring(0, pos);
+            paraValue = parameters[i].substring(pos + 1);
+            // 如果查询的name等于当前name，就返回当前值，同时，将链接中的+号还原成空格
+            if (paraName == name) {
+                return decodeURIComponent(paraValue.replace("+", " "));
+            }
+        }
+        return '';
+    }
+
+
+    var code = getUrlParam("code", window.location.href);
+    IDLAPI.interfaces['ddh5.IDLAPI.QrcodeI'].scan({data: [code]}).then(function (res) {
+    });
+
+    function conformClick() {
+        dd.ready(function () {
+            dd.internal.request.getSecurityToken({
+                onSuccess: function (res) {
+                    IDLAPI.interfaces['ddh5.IDLAPI.QrcodeI'].bindV2({data: [code, res.securityToken]}).then(function (data) {
+                        dd.biz.navigation.close();
+                    }, function (data) {
+                        dd.ready(function () {
+                            dd.device.notification.alert({
+                                message: data.responseText,
+                                title: "",
+                                buttonName: "确定",
+                                onSuccess: function () {
+                                    dd.biz.navigation.close();
+                                },
+                                onFail: function (err) {
+                                }
+                            });
+                        });
+                    });
+                },
+                onFail: function () {
+                    dd.device.notification.alert({
+                        message: "您当前使用的学习强国App版本过低，请前往应用市场下载最新版后重试。",
+                        title: "",
+                        buttonName: "确定",
+                        onSuccess: function () {
+                            dd.biz.navigation.close();
+                        },
+                        onFail: function (err) {
+                        }
+                    });
+                }
+            });
+        });
+
+    }
+
+    function cancelClick() {
+        dd.biz.navigation.close();
+    }
+
+</script>
+
+</body>
+</html>
